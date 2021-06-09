@@ -18,7 +18,7 @@ const RegisterTerm = () => {
     <>
       <input
         type="text"
-        value={ term }
+        // value={ }
         onchange={ ({ target }) => setTerm(target.value) }
       />
       <button
