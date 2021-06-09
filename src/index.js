@@ -3,9 +3,12 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import AppProvider from '../src/context/AppProvider';
 
 ReactDOM.render(
-  <App />,
+  <AppProvider>
+    <App />
+  </AppProvider>,
   document.getElementById('root')
 );
 
