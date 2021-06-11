@@ -6,7 +6,7 @@ function App() {
   return (
     <BrowserRouter>
       <Route exact path="/" component={ RegisterTerm } />
-      <Route exact path="/registered" component={ RegisteredTerm } />
+      <Route exact path="/:name" component={ RegisteredTerm } />
     </BrowserRouter>
   );
 }

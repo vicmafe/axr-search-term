@@ -1,20 +1,25 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import axios from 'axios';
 
 const RegisterTerm = () => {
-  const [ searchTerm, setSearchTerm ] = useState('');
-  const [ responseFetchTerm, setResponseFetchTerm ] = useState([]);
-  const [ disableButton, setDisableButton ] = useState(true)
-  const history = useHistory();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [responseFetchTerm, setResponseFetchTerm] = useState([]);
+  const [disableButton, setDisableButton] = useState(true)
+  const [modal, setModal] = useState(false);
+
+  const processTermRequest = (term) => {
+    const termReplace = responseFetchTerm.find(item => item.name === term)
+    if (termReplace) return setModal(true);
+    if (!termReplace) return inspectRequest();
+  };
 
   const inspectRequest = async () => {
     const keyword = { 'keyword': searchTerm };
     const options = {
       method: 'POST',
-      headers:{ 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       url: 'http://testapp.axreng.com:3000/crawl',
       data: keyword,
     };
@@ -22,51 +27,67 @@ const RegisterTerm = () => {
       await axios(options)
         .then((response) => addIdTerm({ name: searchTerm, id: response.data.id }));
     } catch (e) {
-      console.log('erro desconhecido')
+      console.log('erro de conexão')
     }
   };
 
   const addIdTerm = (id) => {
-    const updateTermListSearched = [ ...responseFetchTerm, id ];
+    const updateTermListSearched = [...responseFetchTerm, id];
     return setResponseFetchTerm(updateTermListSearched);
   }
 
   const verifyLocalStorage = () => {
     if (localStorage.terms) {
       const termList = JSON.parse(localStorage.getItem('terms'))
-      console.log('termos no local storage', termList)
       return setResponseFetchTerm(termList)
     }
   }
 
-  const validateTerm = () => {
-    if (searchTerm.length > 4) setDisableButton(false);
-    if (searchTerm.length > 31 || searchTerm.length < 5) setDisableButton(true);
-  };
+  const removeTerm = (id) => {
+    const termsMaintain = responseFetchTerm.filter(term => term.id !== id)
+    return setResponseFetchTerm(termsMaintain);
+  }
 
   useEffect(() => verifyLocalStorage(), []);
-  useEffect(() => validateTerm(), [searchTerm]);
-  useEffect(() => localStorage.setItem('terms', JSON.stringify(responseFetchTerm)), [responseFetchTerm]);
+
+  useEffect(() => {
+    if (searchTerm.length > 4) setDisableButton(false);
+    if (searchTerm.length < 5 || searchTerm.length > 31) setDisableButton(true);
+  }, [searchTerm]);
+  
+  useEffect(() => {
+    localStorage.setItem('terms', JSON.stringify(responseFetchTerm))
+  
+  }, [responseFetchTerm]);
 
   return (
     <>
       <input
         type="text"
-        onChange={ (e) => setSearchTerm(e.target.value) }
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
       <button
-        disabled={ disableButton }
+        disabled={disableButton}
         type="button"
-        onClick={ () => inspectRequest() }
+        onClick={() => processTermRequest(searchTerm)}
       >
         Cadastrar
       </button>
-      <button
-        type="button"
-        onClick={ () => history.push('/registered') }
-      >
-        Solicitações Cadastradas
-      </button>
+      {
+        responseFetchTerm.map((term, index) => (
+          <div key={index}>
+            <Link to={`/${term.name}`}>
+              <p>{term.name}</p>
+            </Link>
+            <button
+              onClick={() => removeTerm(term.id)}
+            >
+              X
+            </button>
+          </div>
+        ))
+
+      }
     </>
   )
 };
