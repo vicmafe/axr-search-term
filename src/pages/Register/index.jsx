@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -30,22 +31,22 @@ const RegisterTerm = () => {
     return setResponseFetchTerm(updateTermListSearched);
   }
 
-  const sendLocalStorage = (terms) => {
-    return localStorage.setItem('terms', terms);
-  };
+  const verifyLocalStorage = () => {
+    if (localStorage.terms) {
+      const termList = JSON.parse(localStorage.getItem('terms'))
+      console.log('termos no local storage', termList)
+      return setResponseFetchTerm(termList)
+    }
+  }
 
   const validateTerm = () => {
     if (searchTerm.length > 4) setDisableButton(false);
     if (searchTerm.length > 31 || searchTerm.length < 5) setDisableButton(true);
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => localStorage.removeItem('terms'))
+  useEffect(() => verifyLocalStorage(), []);
   useEffect(() => validateTerm(), [searchTerm]);
-  useEffect(() => {
-    sendLocalStorage(responseFetchTerm)
-    return sendLocalStorage(responseFetchTerm);
-  }, [])
+  useEffect(() => localStorage.setItem('terms', JSON.stringify(responseFetchTerm)), [responseFetchTerm]);
 
   return (
     <>
