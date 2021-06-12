@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import * as S from './style';
+
 
 import axios from 'axios';
 
@@ -7,12 +9,11 @@ const RegisterTerm = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [responseFetchTerm, setResponseFetchTerm] = useState([]);
   const [disableButton, setDisableButton] = useState(true)
-  const [modal, setModal] = useState(false);
 
   const processTermRequest = (term) => {
-    const termReplace = responseFetchTerm.find(item => item.name === term)
-    if (termReplace) return setModal(true);
-    if (!termReplace) return inspectRequest();
+    const termRepeated = responseFetchTerm.find(item => item.name === term)
+    if (termRepeated) return alert('Este termo já possui solicitação em andamento, por favro digite outro.');
+    if (!termRepeated) return inspectRequest();
   };
 
   const inspectRequest = async () => {
@@ -27,7 +28,7 @@ const RegisterTerm = () => {
       await axios(options)
         .then((response) => addIdTerm({ name: searchTerm, id: response.data.id }));
     } catch (e) {
-      console.log('erro de conexão')
+      return alert('erro de conexão!')
     }
   };
 
@@ -57,38 +58,36 @@ const RegisterTerm = () => {
   
   useEffect(() => {
     localStorage.setItem('terms', JSON.stringify(responseFetchTerm))
-  
   }, [responseFetchTerm]);
 
   return (
-    <>
-      <input
+    <S.Container>
+      <S.Input
         type="text"
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <button
+      <S.Button
         disabled={disableButton}
         type="button"
         onClick={() => processTermRequest(searchTerm)}
       >
         Cadastrar
-      </button>
+      </S.Button>
       {
         responseFetchTerm.map((term, index) => (
-          <div key={index}>
-            <Link to={`/${term.name}`}>
-              <p>{term.name}</p>
+          <S.CardTerm key={index}>
+            <Link to={`/${term.id}`}>
+              <S.TermName>{term.name}</S.TermName>
             </Link>
-            <button
+            <S.ButtonRemove
               onClick={() => removeTerm(term.id)}
             >
               X
-            </button>
-          </div>
+            </S.ButtonRemove>
+          </S.CardTerm>
         ))
-
       }
-    </>
+    </S.Container>
   )
 };
 
