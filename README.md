@@ -2,7 +2,7 @@
 
 ## Descrição do Projeto
 
-<p>Desenvolvimento front end para cadastro de termos para busca web crawl e consulta detalhes do procedimento de solicitação.</p>
+<p>Desenvolvimento front end para cadastro de termos para inspeção web crawl e consulta detalhes do procedimento de solicitação.</p>
 
 
 ## Funcionalidades Principais
