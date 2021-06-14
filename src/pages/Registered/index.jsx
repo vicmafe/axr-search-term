@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import iconReturn from '../../images/icon-arrow.svg';
+import * as S from './style';
+import iconHome from '../../images/icon-home.svg';
+
 
 import axios from 'axios';
 
@@ -32,40 +37,72 @@ const RegisteredTerm = (props) => {
 
   const listUrls = () => {
     const urls = statusRequestTerm.urls.map((item, index) => (
-      <div key={index}>
+      <S.Urls key={index}>
         { item}
-      </div>
+      </S.Urls>
     ));
-    return urls.slice(0, 10);
+    return (
+      <>
+        <S.MessageStatus>A pesquisa encontrou os seguintes links:</S.MessageStatus>
+        { urls.slice(0, 10)}
+      </>
+    );
   };
 
   const noContentUrls = () => {
     if (statusRequestTerm.status === 'active') {
-      return <p>O termo solicitado ainda está em processamento,
-        até o momento nenhum resultado encontrado. Aguarde a conclusão.</p>
+      return <S.MessageStatus>O termo solicitado ainda está em processamento,
+        até o momento nenhum resultado encontrado. Aguarde a conclusão .</S.MessageStatus>
     }
     if (statusRequestTerm.status === 'done') {
-      return <p>O termo solicitado não retornou resultados</p>
+      return <S.MessageStatus>O termo solicitado não retornou resultados</S.MessageStatus>
     }
   };
 
   useEffect(() => {
     inspectRequest()
     findTermById(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <>
-      <h1>id do termo: {statusRequestTerm.id}</h1>
-      <h1>status: {statusRequestTerm.status}</h1>
-      <h1>Termo solicitado: {termName}</h1>
-      { isLoading ?
-        <p>Loading...</p> :
-        !statusRequestTerm.urls || statusRequestTerm.urls.length < 1 ?
-          noContentUrls() :
-          listUrls()
+    <S.Container>
+      <S.LabelTerm>Termo solicitado: </S.LabelTerm>
+      <S.Term color='#fff' colorText='#f77b3d'>{termName}</S.Term>
+      <S.LabelTerm>Status:</S.LabelTerm>
+      <S.Term
+        {
+        ...statusRequestTerm.status === 'active' ?
+          { color: '#00a000', colorText: '#fff' } :
+          { color: '#0000cd', colorText: '#f77b3d' }
+        }
+      >
+        {
+          statusRequestTerm.status
+        }
+      </S.Term>
+      {
+        isLoading ?
+          <S.MessageStatus>Loading...</S.MessageStatus> :
+          !statusRequestTerm.urls || statusRequestTerm.urls.length < 1 ?
+            noContentUrls() :
+            listUrls()
       }
-    </>
+      <S.BoxIcons>
+        <S.Icon>
+          <Link to="/register" style={{ textDecoration: 'none' }}>
+            <img src={iconReturn} alt="icon return" />
+          Voltar
+        </Link>
+        </S.Icon>
+        <S.Icon>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <img src={iconHome} alt="icon home" />
+          Início
+        </Link>
+        </S.Icon>
+      </S.BoxIcons>
+    </S.Container>
   );
 };
 

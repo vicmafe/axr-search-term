@@ -9,11 +9,15 @@ const RegisterTerm = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [responseFetchTerm, setResponseFetchTerm] = useState([]);
   const [disableButton, setDisableButton] = useState(true)
+  const [termExists, setTermExists] = useState(false)
 
   const processTermRequest = (term) => {
     const termRepeated = responseFetchTerm.find(item => item.name === term)
     if (termRepeated) return alert('Este termo já possui solicitação em andamento, por favro digite outro.');
-    if (!termRepeated) return inspectRequest();
+    if (!termRepeated) {
+      setTermExists(true);
+      return inspectRequest();
+    }
   };
 
   const inspectRequest = async () => {
@@ -38,15 +42,21 @@ const RegisterTerm = () => {
   }
 
   const verifyLocalStorage = () => {
-    if (localStorage.terms) {
-      const termList = JSON.parse(localStorage.getItem('terms'))
-      return setResponseFetchTerm(termList)
+    const termList = JSON.parse(localStorage.getItem('terms'))
+    console.log(termList)
+    if (termList.length >= 1) {
+      setTermExists(true);
+      return setResponseFetchTerm(termList);
     }
+    return setTermExists(false);
   }
 
   const removeTerm = (id) => {
     const termsMaintain = responseFetchTerm.filter(term => term.id !== id)
-    return setResponseFetchTerm(termsMaintain);
+    setResponseFetchTerm(termsMaintain);
+    if (termsMaintain.length < 1) {
+      return setTermExists(false);
+    }
   }
 
   useEffect(() => verifyLocalStorage(), []);
@@ -55,37 +65,69 @@ const RegisterTerm = () => {
     if (searchTerm.length > 4) setDisableButton(false);
     if (searchTerm.length < 5 || searchTerm.length > 31) setDisableButton(true);
   }, [searchTerm]);
-  
+
   useEffect(() => {
     localStorage.setItem('terms', JSON.stringify(responseFetchTerm))
   }, [responseFetchTerm]);
 
   return (
     <S.Container>
-      <S.Input
-        type="text"
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <S.Button
-        disabled={disableButton}
-        type="button"
-        onClick={() => processTermRequest(searchTerm)}
-      >
-        Cadastrar
-      </S.Button>
       {
-        responseFetchTerm.map((term, index) => (
-          <S.CardTerm key={index}>
-            <Link to={`/${term.id}`}>
-              <S.TermName>{term.name}</S.TermName>
-            </Link>
-            <S.ButtonRemove
-              onClick={() => removeTerm(term.id)}
-            >
-              X
-            </S.ButtonRemove>
-          </S.CardTerm>
-        ))
+        termExists ?
+          <></> :
+          <>
+            <S.TitleMain>Que bom que vc está aqui!</S.TitleMain>
+            <S.TextMain>
+              Vou te explicar como funciona, primeiramente você precisará cadastar o termo
+              que você deseja fazer o web crawling na rede. Pode fazer isso digitando no 
+              campo abaixo e em seguida clique em cadastrar.
+            </S.TextMain>
+          </>
+      }
+      <S.ContainerInput>
+        <S.Input
+          placeholder="Entre 4 e 31 caracteres"
+          type="text"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <S.ButtonSubmit
+          disabled={disableButton}
+          onClick={() => processTermRequest(searchTerm)}
+        >
+          Cadastrar
+      </S.ButtonSubmit>
+      </S.ContainerInput>
+      {
+        !termExists ? <></> :
+          <S.ContainerTerms>
+            <S.TitleTerm>
+              Termos cadastrados:
+            </S.TitleTerm>
+            {
+              <S.BoxTerm>
+                {
+                  responseFetchTerm.map((term, index) => (
+                    <S.CardTerm key={index}>
+                      <S.TermName>
+                        <Link style={{ textDecoration: 'none', color: '#444444' }} to={`/${term.id}`}>
+                          {term.name}
+                        </Link>
+                      </S.TermName>
+                      <S.ButtonRemove
+                        onClick={() => removeTerm(term.id)}
+                      >
+                        X
+                      </S.ButtonRemove>
+                    </S.CardTerm>
+                  ))
+                }
+              </S.BoxTerm>
+            }
+            <S.Info>
+              * OBS: Para ver detalhes do processamento da sua solicitação de consulta, clique no termo desejado.
+              Caso deseje excluir algum termo, clique no x.
+            </S.Info>
+          </S.ContainerTerms>
       }
     </S.Container>
   )
